@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:vm="clr-namespace:ZLauncher.ViewModels"
+x:Class="ZLauncher.Views.SettingsView"
+x:DataType="vm:SettingsViewModel">
+
+<StackPanel Margin="40" Spacing="25">
+    <TextBlock Text="НАСТРОЙКИ" FontSize="32" FontWeight="Bold" Foreground="White"/>
+    
+    <!-- RAM SETTINGS -->
+    <StackPanel Spacing="10">
+        <TextBlock Text="Выделение ОЗУ (MB)" Foreground="{DynamicResource PrimaryGreen}"/>
+        <Grid ColumnDefinitions="*, Auto">
+            <Slider Grid.Column="0" Minimum="1024" Maximum="16384" Value="{Binding SelectedRam}" TickFrequency="1024" IsSnapToTickEnabled="True"/>
+            <TextBlock Grid.Column="1" Text="{Binding SelectedRam}" Foreground="White" Margin="15,0,0,0" VerticalAlignment="Center"/>
+        </Grid>
+    </StackPanel>
+    
+    <!-- THEME COLOR -->
+    <StackPanel Spacing="10">
+        <TextBlock Text="Цвет интерфейса" Foreground="{DynamicResource PrimaryGreen}"/>
+        
+        <!-- Presets -->
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Command="{Binding SetGreenCommand}" Width="30" Height="30" Background="#39FF14" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
+            <Button Command="{Binding SetRedCommand}" Width="30" Height="30" Background="#FF0000" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
+            <Button Command="{Binding SetBlueCommand}" Width="30" Height="30" Background="#00FFFF" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
+        </StackPanel>
+        
+        <!-- Custom Hex -->
+        <Grid ColumnDefinitions="*, Auto" Margin="0,10,0,0">
+            <TextBox Grid.Column="0" Text="{Binding CustomHexColor}" Watermark="#RRGGBB" Margin="0,0,10,0"/>
+            <Button Grid.Column="1" Command="{Binding ApplyHexColorCommand}" Content="Применить HEX" Background="#333" Foreground="White"/>
+        </Grid>
+    </StackPanel>
+
+    <!-- LOGO & APPEARANCE -->
+    <StackPanel Spacing="10">
+        <TextBlock Text="Кастомизация" Foreground="{DynamicResource PrimaryGreen}"/>
+        
+        <Button Command="{Binding ChangeLogoCommand}" Background="#333" Foreground="White" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource image_regular}"/>
+                <TextBlock Text="Загрузить лого (.png/.gif)"/>
+            </StackPanel>
+        </Button>
+        
+        <TextBlock Text="* Логотип сохранится и загрузится при следующем запуске" FontSize="10" Foreground="Gray"/>
+    </StackPanel>
+    
+</StackPanel>
+</UserControl>

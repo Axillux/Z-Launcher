@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:vm="clr-namespace:ZLauncher.ViewModels"
+x:Class="ZLauncher.Views.HomeView"
+x:DataType="vm:HomeViewModel">
+
+<Grid RowDefinitions="Auto, *, Auto" Margin="40">
+    
+    <!-- TOP HEADER -->
+    <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+        <StackPanel Grid.Column="0">
+            <TextBlock Text="Майнкрафт" Foreground="White" FontSize="48" FontWeight="Black" LetterSpacing="2"/>
+            <TextBlock Text="Клаб" Foreground="{DynamicResource PrimaryGreen}" FontSize="48" FontWeight="Black" LetterSpacing="2" Margin="0,-15,0,0"/>
+        </StackPanel>
+        
+        <Border Grid.Column="1" BorderBrush="{DynamicResource PrimaryGreen}" BorderThickness="1" CornerRadius="5" Padding="10,5">
+            <TextBlock Text="{Binding ServerStatus}" Foreground="{DynamicResource PrimaryGreen}"/>
+        </Border>
+    </Grid>
+    
+    <!-- NEWS SECTION (Simulated from sketch) -->
+    <Border Grid.Row="1" BorderBrush="#333" BorderThickness="1" Background="#1A1A1A" CornerRadius="10" Margin="0,30">
+        <Grid RowDefinitions="Auto, *">
+            <TextBlock Text="Новости" Foreground="White" FontSize="18" Margin="20,15"/>
+            <StackPanel Grid.Row="1" Margin="20,0">
+                <TextBlock Text="Меня изнасиловали!" Foreground="Gray" Margin="0,5"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+    
+    <!-- BOTTOM ACTIONS -->
+    <StackPanel Grid.Row="2" Spacing="10">
+        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="4" Foreground="{DynamicResource PrimaryGreen}" Background="#333"/>
+        <TextBlock Text="{Binding StatusText}" Foreground="Gray" HorizontalAlignment="Center"/>
+        
+        <Button Classes="play" Command="{Binding LaunchCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource games_regular}"/>
+                <TextBlock Text="ИГРАТЬ"/>
+            </StackPanel>
+        </Button>
+    </StackPanel>
+
+</Grid>
+</UserControl>

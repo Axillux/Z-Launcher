@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- REMOVED: <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Avalonia UI -->
+    <PackageReference Include="Avalonia" Version="11.1.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.0" />
+
+    <!-- CORRECT WEBVIEW PACKAGES -->
+    <PackageReference Include="WebView.Avalonia" Version="11.0.0.1" />
+    <PackageReference Include="WebView.Avalonia.Desktop" Version="11.0.0.1" />
+
+    <!-- MINECRAFT CORE -->
+    <PackageReference Include="CmlLib.Core" Version="4.0.6" />
+
+    <!-- AUTHENTICATION -->
+    <PackageReference Include="CmlLib.Core.Auth.Microsoft" Version="3.3.0" />
+    <PackageReference Include="XboxAuthNet.Game.Msal" Version="0.1.2" />
+
+    <!-- FORGE INSTALLER -->
+    <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.1.0" />
+
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+xmlns:vm="clr-namespace:ZLauncher.ViewModels"
+xmlns:views="clr-namespace:ZLauncher.Views"
+mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+x:Class="ZLauncher.Views.MainView"
+x:DataType="vm:MainViewModel">
+
+<!-- THIS IS THE FIX: Define how to draw each page here -->
+<UserControl.DataTemplates>
+    <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+        <views:HomeView/>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+        <views:SettingsView/>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
+        <views:ProfileView/>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:ModsViewModel}">
+        <views:ModsView/>
+    </DataTemplate>
+</UserControl.DataTemplates>
+
+<Grid ColumnDefinitions="220, *">
+    <!-- NAVBAR -->
+    <Border Grid.Column="0" Background="{DynamicResource LightBackground}" BorderBrush="{DynamicResource PrimaryGreen}" BorderThickness="0,0,2,0">
+        <Grid RowDefinitions="Auto, *, Auto">
+            
+            <!-- LOGO AREA -->
+            <StackPanel Grid.Row="0" Margin="20">
+                <!-- Custom Image Binding -->
+                <Image Source="{Binding LogoBitmap}" Width="100" Height="100" IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                
+                <!-- Default Fallback (Only if LogoBitmap is null) -->
+                <Path Data="M10,0 L20,10 L10,20 L0,10 Z" Fill="{DynamicResource PrimaryGreen}" HorizontalAlignment="Center" Width="40" Height="40" Stretch="Uniform"
+                      IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNull}}"/>
+                      
+                <TextBlock Text="Z-LAUNCHER" Foreground="{DynamicResource PrimaryGreen}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+            
+            <!-- BUTTONS -->
+            <StackPanel Grid.Row="1" Spacing="5">
+                <Button Classes="nav" Command="{Binding NavigateHome}" Content="Домой"/>
+                <Button Classes="nav" Command="{Binding NavigateProfile}" Content="Профиль"/>
+                <Button Classes="nav" Command="{Binding NavigateMods}" Content="Моды"/>
+                <Button Classes="nav" Command="{Binding NavigateSettings}" Content="Настройки"/>
+            </StackPanel>
+            
+            <!-- FOOTER -->
+            <StackPanel Grid.Row="2" Margin="20">
+                 <TextBlock Text="v1.0.0" Foreground="Gray" HorizontalAlignment="Center" FontSize="12"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+    
+    <!-- CONTENT AREA -->
+    <!-- Removed the complex nested templates, just simple binding now -->
+    <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
+    
+</Grid>
+</UserControl>
