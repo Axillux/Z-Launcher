@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using Avalonia.WebView.Desktop; // <--- REQUIRED for UseDesktopWebView
+using Avalonia.WebView.Desktop; // нужен
 
 
 namespace ZLauncher.Desktop;
@@ -18,6 +18,6 @@ public static AppBuilder BuildAvaloniaApp()
         .WithInterFont()
         .LogToTrace()
         .UseReactiveUI()
-        .UseDesktopWebView(); // <--- THIS IS THE CORRECT METHOD NAME
+        .UseDesktopWebView(); // чтобы скины превью работали
 
 }
