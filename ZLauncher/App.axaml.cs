@@ -19,11 +19,9 @@ public override void Initialize()
     AvaloniaXamlLoader.Load(this);
 }
 
-// THIS IS THE FIX: Initialize WebView services here
 public override void RegisterServices()
 {
     base.RegisterServices();
-    // Initialize WebView for the current platform
     AvaloniaWebViewBuilder.Initialize(default);
 }
 

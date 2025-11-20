@@ -3,7 +3,6 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 x:Class="ZLauncher.App"
 RequestedThemeVariant="Dark">
 
-<!-- GLOBAL RESOURCES (Colors) GO HERE -->
 <Application.Resources>
     <SolidColorBrush x:Key="PrimaryGreen">#39FF14</SolidColorBrush>
     <SolidColorBrush x:Key="DarkBackground">#111111</SolidColorBrush>
@@ -14,7 +13,6 @@ RequestedThemeVariant="Dark">
 <Application.Styles>
     <FluentTheme />
     
-    <!-- Button Style: Navigation -->
     <Style Selector="Button.nav">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}"/>
@@ -26,13 +24,11 @@ RequestedThemeVariant="Dark">
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     
-    <!-- Button Hover State -->
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#3339FF14"/>
         <Setter Property="Foreground" Value="White"/>
     </Style>
 
-    <!-- Button Style: Play -->
     <Style Selector="Button.play">
         <Setter Property="Background" Value="{DynamicResource PrimaryGreen}"/>
         <Setter Property="Foreground" Value="Black"/>
