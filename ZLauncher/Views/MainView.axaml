@@ -1,64 +1,116 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-xmlns:vm="clr-namespace:ZLauncher.ViewModels"
-xmlns:views="clr-namespace:ZLauncher.Views"
-mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
-x:Class="ZLauncher.Views.MainView"
-x:DataType="vm:MainViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ZLauncher.ViewModels"
+             xmlns:views="clr-namespace:ZLauncher.Views"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:Class="ZLauncher.Views.MainView"
+             x:DataType="vm:MainViewModel">
 
-<!-- Определяем, как рисовать каждую страницу здесь -->
-<UserControl.DataTemplates>
-    <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-        <views:HomeView/>
-    </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-        <views:SettingsView/>
-    </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
-        <views:ProfileView/>
-    </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:ModsViewModel}">
-        <views:ModsView/>
-    </DataTemplate>
-</UserControl.DataTemplates>
+    <!-- Определяем, как рисовать каждую страницу здесь -->
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+            <views:HomeView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
+            <views:ProfileView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ModsViewModel}">
+            <views:ModsView/>
+        </DataTemplate>
+    </UserControl.DataTemplates>
 
-<Grid ColumnDefinitions="220, *">
-    <!-- Навигация -->
-    <Border Grid.Column="0" Background="{DynamicResource LightBackground}" BorderBrush="{DynamicResource PrimaryGreen}" BorderThickness="0,0,2,0">
-        <Grid RowDefinitions="Auto, *, Auto">
-            
-            <!-- Логотип -->
-            <StackPanel Grid.Row="0" Margin="20">
-                <!-- Изображение -->
-                <Image Source="{Binding LogoBitmap}" Width="100" Height="100" IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+    <SplitView IsPaneOpen="{Binding IsPaneOpen}"
+               DisplayMode="CompactInline"
+               OpenPaneLength="220"
+               CompactPaneLength="60"
+               PaneBackground="{DynamicResource LightBackground}">
+        
+        <SplitView.Pane>
+            <Border BorderBrush="{DynamicResource PrimaryGreen}" BorderThickness="0,0,2,0">
+                <Grid RowDefinitions="Auto, *, Auto">
+                    
+                    <!-- Header / Logo / Hamburger -->
+                    <StackPanel Grid.Row="0" Margin="0,10">
+                        <!-- Hamburger Button -->
+                        <Button Command="{Binding TogglePaneCommand}" 
+                                Background="Transparent" 
+                                HorizontalAlignment="Left"
+                                Width="58"
+                                Height="40"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center">
+                            <PathIcon Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" 
+                                      Foreground="{DynamicResource PrimaryGreen}"/>
+                        </Button>
+
+                        <StackPanel Margin="20" IsVisible="{Binding IsPaneOpen}">
+                            <!-- Изображение -->
+                            <Image Source="{Binding LogoBitmap}" Width="100" Height="100" IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                 
-                <!-- Дефолтный логотип (только если LogoBitmap null) -->
-                <Path Data="M10,0 L20,10 L10,20 L0,10 Z" Fill="{DynamicResource PrimaryGreen}" HorizontalAlignment="Center" Width="40" Height="40" Stretch="Uniform"
-                      IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNull}}"/>
+                            <!-- Дефолтный логотип (только если LogoBitmap null) -->
+                            <Path Data="M10,0 L20,10 L10,20 L0,10 Z" Fill="{DynamicResource PrimaryGreen}" HorizontalAlignment="Center" Width="40" Height="40" Stretch="Uniform"
+                                  IsVisible="{Binding LogoBitmap, Converter={x:Static ObjectConverters.IsNull}}"/>
                       
-                <TextBlock Text="Z-LAUNCHER" Foreground="{DynamicResource PrimaryGreen}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,10,0,0"/>
-            </StackPanel>
-            
-            <!-- Кнопки -->
-            <StackPanel Grid.Row="1" Spacing="5">
-                <Button Classes="nav" Command="{Binding NavigateHome}" Content="Домой"/>
-                <Button Classes="nav" Command="{Binding NavigateProfile}" Content="Профиль"/>
-                <Button Classes="nav" Command="{Binding NavigateMods}" Content="Моды"/>
-                <Button Classes="nav" Command="{Binding NavigateSettings}" Content="Настройки"/>
-            </StackPanel>
-            
-            <!-- Нижняя часть -->
-            <StackPanel Grid.Row="2" Margin="20">
-                 <TextBlock Text="v1.0.0" Foreground="Gray" HorizontalAlignment="Center" FontSize="12"/>
-            </StackPanel>
-        </Grid>
-    </Border>
-    
-    <!-- Контент -->
-    <!-- Убрали сложные вложенные шаблоны, просто привязка теперь -->
-    <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
-    
-</Grid>
+                            <TextBlock Text="Z-LAUNCHER" Foreground="{DynamicResource PrimaryGreen}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <!-- Кнопки Навигации -->
+                    <StackPanel Grid.Row="1" Spacing="0">
+                        <Button Classes="nav" Command="{Binding NavigateHome}" ToolTip.Tip="Домой">
+                             <Grid ColumnDefinitions="58, *" Height="50">
+                                 <PathIcon Grid.Column="0" Data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" Width="24" Height="24" HorizontalAlignment="Center" />
+                                 <TextBlock Grid.Column="1" Text="Домой" VerticalAlignment="Center" IsVisible="{Binding IsPaneOpen}" Margin="10,0,0,0"/>
+                             </Grid>
+                        </Button>
+                        <Button Classes="nav" Command="{Binding NavigateProfile}" ToolTip.Tip="Профиль">
+                             <Grid ColumnDefinitions="58, *" Height="50">
+                                 <PathIcon Grid.Column="0" Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" Width="24" Height="24" HorizontalAlignment="Center" />
+                                 <TextBlock Grid.Column="1" Text="Профиль" VerticalAlignment="Center" IsVisible="{Binding IsPaneOpen}" Margin="10,0,0,0"/>
+                             </Grid>
+                        </Button>
+                         <Button Classes="nav" Command="{Binding NavigateMods}" ToolTip.Tip="Моды">
+                             <Grid ColumnDefinitions="58, *" Height="50">
+                                 <PathIcon Grid.Column="0" Data="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L6.04,7.5L12,10.85L17.96,7.5L12,4.15M5,15.91L11,19.29V12.58L5,9.21V15.91M19,15.91V9.21L13,12.58V19.29L19,15.91Z" Width="24" Height="24" HorizontalAlignment="Center" />
+                                 <TextBlock Grid.Column="1" Text="Моды" VerticalAlignment="Center" IsVisible="{Binding IsPaneOpen}" Margin="10,0,0,0"/>
+                             </Grid>
+                        </Button>
+                        <Button Classes="nav" Command="{Binding NavigateSettings}" ToolTip.Tip="Настройки">
+                             <Grid ColumnDefinitions="58, *" Height="50">
+                                 <PathIcon Grid.Column="0" Data="M19.14,12.94C19.14,12.94 19.14,12.94 19.14,12.94V11.06L21.39,9.17C21.59,9 21.64,8.71 21.5,8.47L19.61,5.21C19.47,4.96 19.16,4.87 18.92,4.96L16.21,6.06C15.65,5.64 15.04,5.28 14.39,5L13.97,2.11C13.94,1.84 13.71,1.65 13.43,1.65H9.66C9.38,1.65 9.15,1.84 9.12,2.11L8.7,5C8.05,5.28 7.44,5.64 6.88,6.06L4.17,4.96C3.93,4.87 3.62,4.96 3.48,5.21L1.59,8.47C1.45,8.71 1.5,9 1.7,9.17L3.95,11.06V12.94L1.7,14.83C1.5,15 1.45,15.29 1.59,15.53L3.48,18.79C3.62,19.04 3.93,19.13 4.17,19.04L6.88,17.94C7.44,18.36 8.05,18.72 8.7,19L9.12,21.89C9.15,22.16 9.38,22.35 9.66,22.35H13.43C13.71,22.35 13.94,22.16 13.97,21.89L14.39,19C15.04,18.72 15.65,18.36 16.21,17.94L18.92,19.04C19.16,19.13 19.47,19.04 19.61,18.79L21.5,15.53C21.64,15.29 21.59,15 21.39,14.83L19.14,12.94M11.55,15.21C9.77,15.21 8.34,13.78 8.34,12C8.34,10.22 9.77,8.79 11.55,8.79C13.32,8.79 14.75,10.22 14.75,12C14.75,13.78 13.32,15.21 11.55,15.21Z" Width="24" Height="24" HorizontalAlignment="Center" />
+                                 <TextBlock Grid.Column="1" Text="Настройки" VerticalAlignment="Center" IsVisible="{Binding IsPaneOpen}" Margin="10,0,0,0"/>
+                             </Grid>
+                        </Button>
+                    </StackPanel>
+                    
+                    <!-- Нижняя часть -->
+                    <StackPanel Grid.Row="2" Margin="0,0,0,20">
+                        <!-- Discord Button -->
+                         <Button Classes="nav" 
+                                 Command="{Binding OpenDiscordCommand}" 
+                                 ToolTip.Tip="Discord">
+                             <Grid ColumnDefinitions="58, *" Height="50">
+                                 <Path Grid.Column="0" 
+                                       Data="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" 
+                                       Width="24" Height="24" Stretch="Uniform" Fill="#5865F2" HorizontalAlignment="Center"/>
+                                 <TextBlock Grid.Column="1" Text="Discord" VerticalAlignment="Center" IsVisible="{Binding IsPaneOpen}" Margin="10,0,0,0"/>
+                             </Grid>
+                        </Button>
+
+                        <TextBlock Text="v0.0.1 Альфа гамма бета тест" Foreground="Gray" HorizontalAlignment="Center" FontSize="10" Margin="0,5,0,0" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding IsPaneOpen}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </SplitView.Pane>
+        
+        <SplitView.Content>
+            <!-- Контент -->
+            <ContentControl Content="{Binding CurrentPage}" />
+        </SplitView.Content>
+    </SplitView>
 </UserControl>

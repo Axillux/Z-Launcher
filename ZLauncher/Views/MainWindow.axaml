@@ -8,7 +8,7 @@ mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
 x:Class="ZLauncher.Views.MainWindow"
 x:DataType="vm:MainViewModel"
 Icon="{Binding WindowIcon}"
-    Title="ZLauncher"
+    Title="Z-Launcher"
 Background="{DynamicResource DarkBackground}"
 TransparencyLevelHint="AcrylicBlur"
 WindowStartupLocation="CenterScreen">
