@@ -1,6 +1,8 @@
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ReactiveUI;
+using ZLauncher.Models;
 using ZLauncher.Services;
 
 
@@ -8,23 +10,59 @@ namespace ZLauncher.ViewModels;
 
 public class HomeViewModel : ViewModelBase
 {
-private readonly MinecraftService _service;
-private readonly MainViewModel _mainVm;
-private string _statusText = "Готов к запуску";
-private double _progress = 0;
-private string _serverStatus = "Онлайн: 1";
-
-
-public HomeViewModel(MainViewModel mainVm, MinecraftService service)
-{
-    _mainVm = mainVm;
-    _service = service;
+    private readonly MinecraftService _service;
+    private readonly MainViewModel _mainVm;
+    private readonly NewsService _newsService;
+    private readonly ServerStatusService _serverService;
     
-    LaunchCommand = ReactiveCommand.CreateFromTask(LaunchGame);
+    private string _statusText = "Готов к запуску";
+    private double _progress = 0;
+    private string _serverStatus = "Поиск...";
+    
+    public ObservableCollection<NewsItem> News { get; } = new();
 
-    _service.StatusChanged += (s) => StatusText = s;
-    _service.ProgressChanged += (p) => Progress = p;
-}
+
+    public HomeViewModel(MainViewModel mainVm, MinecraftService service)
+    {
+        _mainVm = mainVm;
+        _service = service;
+        _newsService = new NewsService();
+        _serverService = new ServerStatusService();
+        
+        LaunchCommand = ReactiveCommand.CreateFromTask(LaunchGame);
+
+        _service.StatusChanged += (s) => StatusText = s;
+        _service.ProgressChanged += (p) => Progress = p;
+        
+        LoadNews();
+        StartServerPolling();
+    }
+
+    private async void StartServerPolling()
+    {
+        await CheckServer();
+        
+        while (true)
+        {
+            await Task.Delay(30000);
+            await CheckServer();
+        }
+    }
+
+    private async Task CheckServer()
+    {
+        var (status, count) = await _serverService.PingServerAsync("0.0.0.0", 25565);
+        ServerStatus = status == "Онлайн" ? $"Онлайн: {count}" : "Оффлайн";
+    }
+    
+    private async void LoadNews()
+    {
+        var news = await _newsService.GetNewsAsync();
+        foreach (var item in news)
+        {
+            News.Add(item);
+        }
+    }
 
 public string StatusText
 {
@@ -56,8 +94,8 @@ private async Task LaunchGame()
     
     var settings = _mainVm.SettingsPage;
     
-    // Launch using the session stored in Service
-    await _service.LaunchGameAsync(settings.SelectedRam, settings.CustomJavaPath);
+    var mods = _mainVm.ModsPage.Mods;
+    await _service.LaunchGameAsync(settings.SelectedRam, settings.CustomJavaPath, mods);
 }
 
 }

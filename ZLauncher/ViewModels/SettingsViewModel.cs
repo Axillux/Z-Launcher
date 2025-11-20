@@ -20,13 +20,11 @@ private int _selectedRam;
 private string _customJavaPath = "";
 private string _customHexColor = "#39FF14";
 
-// Main Constructor
 public SettingsViewModel(MainViewModel mainVm, ConfigService configService)
 {
     _mainVm = mainVm;
     _configService = configService;
     
-    // Load Initial Values
     _selectedRam = _configService.CurrentConfig.RamMb;
     _customJavaPath = _configService.CurrentConfig.JavaPath ?? "";
     _customHexColor = _configService.CurrentConfig.ThemeColor;
@@ -34,13 +32,11 @@ public SettingsViewModel(MainViewModel mainVm, ConfigService configService)
     ChangeLogoCommand = ReactiveCommand.CreateFromTask(ChangeLogoAsync);
     ApplyHexColorCommand = ReactiveCommand.Create(ApplyCustomHex);
     
-    // Pre-defined
     SetGreenCommand = ReactiveCommand.Create(() => ChangeColor("#39FF14"));
     SetRedCommand = ReactiveCommand.Create(() => ChangeColor("#FF0000"));
     SetBlueCommand = ReactiveCommand.Create(() => ChangeColor("#00FFFF"));
 }
 
-// Designer Constructor
 public SettingsViewModel() 
 {
      _mainVm = null!;
@@ -96,14 +92,12 @@ private void ChangeColor(string hex)
             Application.Current.Resources["PrimaryGreen"] = new SolidColorBrush(color);
         }
         
-        // Save
-        CustomHexColor = hex; // Update text box
+        CustomHexColor = hex;
         _configService.CurrentConfig.ThemeColor = hex;
         _configService.Save();
     }
     catch
     {
-        // Invalid color
     }
 }
 
@@ -111,7 +105,6 @@ private void ApplyCustomHex()
 {
     if (!string.IsNullOrEmpty(CustomHexColor))
     {
-        // Add # if missing
         if (!CustomHexColor.StartsWith("#")) CustomHexColor = "#" + CustomHexColor;
         ChangeColor(CustomHexColor);
     }
@@ -119,7 +112,6 @@ private void ApplyCustomHex()
 
 private async Task ChangeLogoAsync()
 {
-    // We do the file picking here to get the path directly for saving
     var app = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
     if (app?.MainWindow == null) return;
 
@@ -133,7 +125,7 @@ private async Task ChangeLogoAsync()
     if (files.Count >= 1)
     {
         var path = files[0].Path.LocalPath;
-        _mainVm.SetLogo(path); // Updates View and Saves Config
+        _mainVm.SetLogo(path);
     }
 }
 

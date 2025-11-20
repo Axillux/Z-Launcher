@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
 using ZLauncher.Services;
@@ -13,7 +17,10 @@ public class MainViewModel : ViewModelBase
 private ViewModelBase _currentPage;
 private readonly MinecraftService _minecraftService;
 private readonly ConfigService _configService;
-private Bitmap? _logoBitmap;
+    private Bitmap? _logoBitmap;
+    private WindowIcon? _windowIcon;
+
+    private bool _isPaneOpen = false;
 
 public HomeViewModel HomePage { get; }
 public SettingsViewModel SettingsPage { get; }
@@ -25,9 +32,8 @@ public event Func<Task<Bitmap?>>? RequestLogoPicker;
 public MainViewModel()
 {
     _minecraftService = new MinecraftService();
-    _configService = App.Config; // Use the global singleton loaded in App.cs
+    _configService = App.Config;
 
-    // Initialize Pages
     ProfilePage = new ProfileViewModel(_minecraftService);
     HomePage = new HomeViewModel(this, _minecraftService);
     SettingsPage = new SettingsViewModel(this, _configService);
@@ -35,26 +41,82 @@ public MainViewModel()
 
     _currentPage = HomePage;
     
-    // LOAD SAVED LOGO
+    TogglePaneCommand = ReactiveCommand.Create(() => IsPaneOpen = !IsPaneOpen);
+    
+    OpenDiscordCommand = ReactiveCommand.Create(() => OpenUrl("https://discord.gg/M3qWvcbDaq"));
+    
     LoadSavedLogo();
 }
 
-private void LoadSavedLogo()
+public bool IsPaneOpen
 {
-    var path = _configService.CurrentConfig.LogoPath;
-    if (!string.IsNullOrEmpty(path) && File.Exists(path))
+    get => _isPaneOpen;
+    set => this.RaiseAndSetIfChanged(ref _isPaneOpen, value);
+}
+
+public ICommand TogglePaneCommand { get; }
+public ICommand OpenDiscordCommand { get; }
+
+private void OpenUrl(string url)
+{
+    try
     {
-        try
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    }
+    catch (Exception)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            using var stream = File.OpenRead(path);
-            LogoBitmap = new Bitmap(stream);
+            url = url.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
         }
-        catch
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            // If file is corrupted, ignore
+            Process.Start("xdg-open", url);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("open", url);
         }
     }
 }
+
+    private void LoadSavedLogo()
+    {
+        var path = _configService.CurrentConfig.LogoPath;
+        
+        if (!string.IsNullOrEmpty(path) && File.Exists(path))
+        {
+            try
+            {
+                using var stream = File.OpenRead(path);
+                LogoBitmap = new Bitmap(stream);
+                
+                using var streamIcon = File.OpenRead(path);
+                WindowIcon = new WindowIcon(new Bitmap(streamIcon));
+                return;
+            }
+            catch
+            {
+            }
+        }
+
+        var defaultLogoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logo.png");
+        if (File.Exists(defaultLogoPath))
+        {
+            try
+            {
+                using var stream = File.OpenRead(defaultLogoPath);
+                LogoBitmap = new Bitmap(stream);
+                
+                using var streamIcon = File.OpenRead(defaultLogoPath);
+                WindowIcon = new WindowIcon(new Bitmap(streamIcon));
+            }
+            catch 
+            { 
+            }
+        }
+    }
 
 public ViewModelBase CurrentPage
 {
@@ -62,13 +124,19 @@ public ViewModelBase CurrentPage
     set => this.RaiseAndSetIfChanged(ref _currentPage, value);
 }
 
-public Bitmap? LogoBitmap
-{
-    get => _logoBitmap;
-    set => this.RaiseAndSetIfChanged(ref _logoBitmap, value);
-}
+    public Bitmap? LogoBitmap
+    {
+        get => _logoBitmap;
+        set => this.RaiseAndSetIfChanged(ref _logoBitmap, value);
+    }
 
-public void NavigateHome() => CurrentPage = HomePage;
+    public WindowIcon? WindowIcon
+    {
+        get => _windowIcon;
+        set => this.RaiseAndSetIfChanged(ref _windowIcon, value);
+    }
+
+    public void NavigateHome() => CurrentPage = HomePage;
 public void NavigateSettings() => CurrentPage = SettingsPage;
 public void NavigateProfile() => CurrentPage = ProfilePage;
 public void NavigateMods() => CurrentPage = ModsPage;
@@ -77,32 +145,28 @@ public async void TriggerLogoPicker()
 {
     if (RequestLogoPicker != null)
     {
-        // This gets the Bitmap for the View
         var bmp = await RequestLogoPicker.Invoke();
         if (bmp != null)
         {
             LogoBitmap = bmp;
-            // NOTE: The actual file path saving is tricky here because we returned a Bitmap stream.
-            // To save the path, we will rely on the SettingsViewModel to handle the path logic separately 
-            // or assume the user just picked it. 
-            // See SettingsViewModel for the saving logic.
         }
     }
 }
 
-// Helper to set logo directly from SettingsViewModel
-public void SetLogo(string path)
-{
-    try 
+    public void SetLogo(string path)
     {
-        using var stream = File.OpenRead(path);
-        LogoBitmap = new Bitmap(stream);
-        
-        // Save to config
-        _configService.CurrentConfig.LogoPath = path;
-        _configService.Save();
+        try 
+        {
+            using var stream = File.OpenRead(path);
+            LogoBitmap = new Bitmap(stream);
+            
+            using var streamIcon = File.OpenRead(path);
+            WindowIcon = new WindowIcon(new Bitmap(streamIcon));
+            
+            _configService.CurrentConfig.LogoPath = path;
+            _configService.Save();
+        }
+        catch { }
     }
-    catch { }
-}
 
 }

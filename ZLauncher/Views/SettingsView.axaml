@@ -7,7 +7,7 @@ x:DataType="vm:SettingsViewModel">
 <StackPanel Margin="40" Spacing="25">
     <TextBlock Text="НАСТРОЙКИ" FontSize="32" FontWeight="Bold" Foreground="White"/>
     
-    <!-- RAM SETTINGS -->
+    <!-- Настройки ОЗУ -->
     <StackPanel Spacing="10">
         <TextBlock Text="Выделение ОЗУ (MB)" Foreground="{DynamicResource PrimaryGreen}"/>
         <Grid ColumnDefinitions="*, Auto">
@@ -16,25 +16,25 @@ x:DataType="vm:SettingsViewModel">
         </Grid>
     </StackPanel>
     
-    <!-- THEME COLOR -->
+    <!-- Цвет интерфейса -->
     <StackPanel Spacing="10">
         <TextBlock Text="Цвет интерфейса" Foreground="{DynamicResource PrimaryGreen}"/>
         
-        <!-- Presets -->
+        <!-- Пресеты -->
         <StackPanel Orientation="Horizontal" Spacing="10">
             <Button Command="{Binding SetGreenCommand}" Width="30" Height="30" Background="#39FF14" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
             <Button Command="{Binding SetRedCommand}" Width="30" Height="30" Background="#FF0000" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
             <Button Command="{Binding SetBlueCommand}" Width="30" Height="30" Background="#00FFFF" CornerRadius="15" BorderBrush="White" BorderThickness="1"/>
         </StackPanel>
         
-        <!-- Custom Hex -->
+        <!-- Custom Hex - Пользовательский HEX -->
         <Grid ColumnDefinitions="*, Auto" Margin="0,10,0,0">
             <TextBox Grid.Column="0" Text="{Binding CustomHexColor}" Watermark="#RRGGBB" Margin="0,0,10,0"/>
             <Button Grid.Column="1" Command="{Binding ApplyHexColorCommand}" Content="Применить HEX" Background="#333" Foreground="White"/>
         </Grid>
     </StackPanel>
 
-    <!-- LOGO & APPEARANCE -->
+    <!-- Логотип и внешний вид -->
     <StackPanel Spacing="10">
         <TextBlock Text="Кастомизация" Foreground="{DynamicResource PrimaryGreen}"/>
         

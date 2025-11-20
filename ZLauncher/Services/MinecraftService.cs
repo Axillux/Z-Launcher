@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Net.Http;
+using System.Collections.Generic;
+using ZLauncher.Models;
 using System.Threading.Tasks;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
@@ -27,25 +30,29 @@ public MSession? CurrentSession { get; private set; }
 public event Action<string>? StatusChanged;
 public event Action<double>? ProgressChanged;
 
-public MinecraftService()
-{
-    _path = new MinecraftPath();
-    _launcher = new MinecraftLauncher(_path);
-    
-    var builder = new JELoginHandlerBuilder()
-        .WithAccountManager(_path.ToString() + "/cml_accounts.json");
-        
-    _loginHandler = builder.Build();
-
-    _launcher.FileProgressChanged += (sender, e) =>
+    public MinecraftService()
     {
-        StatusChanged?.Invoke($"[{e.EventType}] {e.Name}");
-        if (e.TotalTasks > 0)
+        // кастомный путь 
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var zLauncherPath = Path.Combine(appData, "ZLauncher");
+        
+        _path = new MinecraftPath(zLauncherPath);
+        _launcher = new MinecraftLauncher(_path);
+        
+        var builder = new JELoginHandlerBuilder()
+            .WithAccountManager(Path.Combine(zLauncherPath, "cml_accounts.json"));
+            
+        _loginHandler = builder.Build();
+
+        _launcher.FileProgressChanged += (sender, e) =>
         {
-            ProgressChanged?.Invoke((double)e.ProgressedTasks / e.TotalTasks * 100);
-        }
-    };
-}
+            StatusChanged?.Invoke($"[{e.EventType}] {e.Name}");
+            if (e.TotalTasks > 0)
+            {
+                ProgressChanged?.Invoke((double)e.ProgressedTasks / e.TotalTasks * 100);
+            }
+        };
+    }
 
 public async Task<MSession?> AutoLoginAsync()
 {
@@ -56,7 +63,7 @@ public async Task<MSession?> AutoLoginAsync()
         
         if (lastAccount != null)
         {
-            StatusChanged?.Invoke("Silent Login...");
+            StatusChanged?.Invoke("Добро пожаловать!");
             
             var app = await MsalClientHelper.BuildApplicationWithCache(ClientID);
             var authenticator = _loginHandler.CreateAuthenticator(lastAccount, default);
@@ -67,13 +74,13 @@ public async Task<MSession?> AutoLoginAsync()
 
             var session = await authenticator.ExecuteForLauncherAsync();
             CurrentSession = session;
-            StatusChanged?.Invoke($"Welcome back, {session.Username}!");
+            StatusChanged?.Invoke($"Рады видеть вас снова, {session.Username}!");
             return session;
         }
     }
     catch (Exception ex)
     {
-        StatusChanged?.Invoke($"Auto-login failed: {ex.Message}");
+        StatusChanged?.Invoke($"Добро пожаловать: {ex.Message}");
     }
     return null;
 }
@@ -82,7 +89,7 @@ public async Task<MSession> LoginMicrosoftAsync()
 {
     try
     {
-        StatusChanged?.Invoke("Microsoft Login...");
+        StatusChanged?.Invoke("Добро пожаловать!");
         
         var app = await MsalClientHelper.BuildApplicationWithCache(ClientID);
         var authenticator = _loginHandler.CreateAuthenticatorWithNewAccount(default);
@@ -94,41 +101,43 @@ public async Task<MSession> LoginMicrosoftAsync()
         var session = await authenticator.ExecuteForLauncherAsync();
         
         CurrentSession = session;
-        StatusChanged?.Invoke($"Logged in: {session.Username}");
+        StatusChanged?.Invoke($"Добро пожаловать, {session.Username}!");
         return session;
     }
     catch (Exception ex)
     {
-        StatusChanged?.Invoke($"Login Error: {ex.Message}");
+        StatusChanged?.Invoke($"Добро пожаловать: {ex.Message}");
         throw;
     }
 }
 
 public async Task<MSession> LoginOfflineAsync(string username)
 {
-    StatusChanged?.Invoke($"Offline Login: {username}");
+    StatusChanged?.Invoke($"Добро пожаловать, {username}!");
     CurrentSession = MSession.CreateOfflineSession(username);
     return await Task.FromResult(CurrentSession);
 }
 
-public async Task LaunchGameAsync(int ramMb, string? javaPath)
-{
-    if (CurrentSession == null)
+    public async Task LaunchGameAsync(int ramMb, string? javaPath, IEnumerable<ModItem> mods)
     {
-        StatusChanged?.Invoke("Error: Please log in first!");
-        return;
-    }
+        if (CurrentSession == null)
+        {
+            StatusChanged?.Invoke("Пожалуйста, сначала войдите в систему!");
+            return;
+        }
 
-    try
-    {
-        StatusChanged?.Invoke("Checking Forge 1.20.1...");
+        try
+        {
+            await ManageModsAsync(mods);
+
+            StatusChanged?.Invoke("Проверяем Forge 1.20.1...");
         
         var forgeInstaller = new ForgeInstaller(_launcher);
         var forgeVersionName = await forgeInstaller.Install(McVersion, ForgeVersion);
 
         if (string.IsNullOrEmpty(forgeVersionName))
         {
-            StatusChanged?.Invoke("Forge Installation Failed!");
+            StatusChanged?.Invoke("Установка Forge не удалась!");
             return;
         }
 
@@ -142,17 +151,65 @@ public async Task LaunchGameAsync(int ramMb, string? javaPath)
 
         if (!string.IsNullOrEmpty(javaPath)) launchOption.JavaPath = javaPath;
 
-        StatusChanged?.Invoke($"Launching {forgeVersionName}...");
+        StatusChanged?.Invoke($"Запускаем {forgeVersionName}...");
         
         var process = await _launcher.InstallAndBuildProcessAsync(forgeVersionName, launchOption);
         
         process.Start();
-        StatusChanged?.Invoke("Game Started!");
+        StatusChanged?.Invoke("Майнкрафт запущен!");
     }
     catch (Exception ex)
     {
-        StatusChanged?.Invoke($"Launch Error: {ex.Message}");
+        StatusChanged?.Invoke($"Ошибка запуска: {ex.Message}");
     }
 }
+
+    private async Task ManageModsAsync(IEnumerable<ModItem> mods)
+    {
+        var modsDir = Path.Combine(_path.BasePath, "mods");
+        Directory.CreateDirectory(modsDir);
+
+        using var httpClient = new HttpClient();
+
+        foreach (var mod in mods)
+        {
+            if (string.IsNullOrEmpty(mod.FileName)) continue;
+
+            var filePath = Path.Combine(modsDir, mod.FileName);
+            var disabledPath = filePath + ".disabled";
+
+            if (mod.IsEnabled)
+            {
+                
+                if (File.Exists(disabledPath))
+                {
+                    if (File.Exists(filePath)) File.Delete(filePath);
+                    File.Move(disabledPath, filePath);
+                }
+
+                if (!File.Exists(filePath) && !string.IsNullOrEmpty(mod.DownloadUrl))
+                {
+                    try
+                    {
+                        StatusChanged?.Invoke($"Скачивание мода: {mod.Name}...");
+                        var data = await httpClient.GetByteArrayAsync(mod.DownloadUrl);
+                        await File.WriteAllBytesAsync(filePath, data);
+                    }
+                    catch (Exception ex)
+                    {
+                        StatusChanged?.Invoke($"Ошибка скачивания {mod.Name}: {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                if (File.Exists(filePath))
+                {
+                    if (File.Exists(disabledPath)) File.Delete(disabledPath);
+                    File.Move(filePath, disabledPath);
+                }
+            }
+        }
+    }
 
 }

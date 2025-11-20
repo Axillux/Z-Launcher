@@ -6,7 +6,7 @@ x:DataType="vm:HomeViewModel">
 
 <Grid RowDefinitions="Auto, *, Auto" Margin="40">
     
-    <!-- TOP HEADER -->
+    <!-- Верхняя часть -->
     <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
         <StackPanel Grid.Column="0">
             <TextBlock Text="Майнкрафт" Foreground="White" FontSize="48" FontWeight="Black" LetterSpacing="2"/>
@@ -18,17 +18,32 @@ x:DataType="vm:HomeViewModel">
         </Border>
     </Grid>
     
-    <!-- NEWS SECTION (Simulated from sketch) -->
+    <!-- Новости -->
     <Border Grid.Row="1" BorderBrush="#333" BorderThickness="1" Background="#1A1A1A" CornerRadius="10" Margin="0,30">
         <Grid RowDefinitions="Auto, *">
             <TextBlock Text="Новости" Foreground="White" FontSize="18" Margin="20,15"/>
-            <StackPanel Grid.Row="1" Margin="20,0">
-                <TextBlock Text="Меня изнасиловали!" Foreground="Gray" Margin="0,5"/>
-            </StackPanel>
+            
+            <ScrollViewer Grid.Row="1" Margin="0,0,0,15">
+                <ItemsControl ItemsSource="{Binding News}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                             <Border BorderBrush="#333" BorderThickness="0,0,0,1" Margin="20,5">
+                                <StackPanel Spacing="5" Margin="0,0,0,10">
+                                    <DockPanel>
+                                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource PrimaryGreen}" FontWeight="Bold" FontSize="14" DockPanel.Dock="Left"/>
+                                        <TextBlock Text="{Binding Date}" Foreground="Gray" FontSize="12" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Content}" Foreground="LightGray" TextWrapping="Wrap" FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </Border>
     
-    <!-- BOTTOM ACTIONS -->
+    <!-- Нижняя часть -->
     <StackPanel Grid.Row="2" Spacing="10">
         <ProgressBar Value="{Binding Progress}" Maximum="100" Height="4" Foreground="{DynamicResource PrimaryGreen}" Background="#333"/>
         <TextBlock Text="{Binding StatusText}" Foreground="Gray" HorizontalAlignment="Center"/>
